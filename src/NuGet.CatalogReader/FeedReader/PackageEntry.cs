@@ -166,6 +166,11 @@ namespace NuGet.CatalogReader
                 throw new InvalidOperationException($"Nuspec not found: {NuspecUri}");
             }
 
+            if (reader.Xml == null)
+            {
+                throw new InvalidOperationException($"Nuspec XML content is null: {NuspecUri}");
+            }
+
             var path = new FileInfo(Path.Combine(outputDirectory, $"{FileBaseName}.nuspec".ToLowerInvariant()));
 
             File.WriteAllText(path.FullName, reader.Xml.ToString());
@@ -288,7 +293,7 @@ namespace NuGet.CatalogReader
         /// </summary>
         /// <param name="other">CatalogEntry</param>
         /// <returns>Comparison int</returns>
-        public int CompareTo(PackageEntry other)
+        public int CompareTo(PackageEntry? other)
         {
             if (other == null)
             {
@@ -319,7 +324,7 @@ namespace NuGet.CatalogReader
         /// </summary>
         /// <param name="obj">Other</param>
         /// <returns>True if equal</returns>
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return Equals(obj as PackageEntry);
         }
@@ -329,7 +334,7 @@ namespace NuGet.CatalogReader
         /// </summary>
         /// <param name="other">Other</param>
         /// <returns>True if equal</returns>
-        public bool Equals(PackageEntry other)
+        public bool Equals(PackageEntry? other)
         {
             if (ReferenceEquals(this, other))
             {
@@ -351,5 +356,12 @@ namespace NuGet.CatalogReader
         {
             return $"{Id} {Version.ToFullString()}";
         }
+
+        public static bool operator ==(PackageEntry? left, PackageEntry? right) => left?.Equals(right) ?? right is null;
+        public static bool operator !=(PackageEntry? left, PackageEntry? right) => !(left == right);
+        public static bool operator <(PackageEntry? left, PackageEntry? right) => left is null ? right is not null : left.CompareTo(right) < 0;
+        public static bool operator <=(PackageEntry? left, PackageEntry? right) => left is null || left.CompareTo(right) <= 0;
+        public static bool operator >(PackageEntry? left, PackageEntry? right) => left is not null && left.CompareTo(right) > 0;
+        public static bool operator >=(PackageEntry? left, PackageEntry? right) => left is null ? right is null : left.CompareTo(right) >= 0;
     }
 }

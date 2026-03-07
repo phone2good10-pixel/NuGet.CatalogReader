@@ -19,7 +19,8 @@ namespace Test.Common
             {
                 var sleetConfig = CreateSleetConfig(root, feedRoot, baseUri);
                 var settings = LocalSettings.Load(sleetConfig);
-                var fileSystem = await FileSystemFactory.CreateFileSystemAsync(settings, cache, "feed");
+                var fileSystem = await FileSystemFactory.CreateFileSystemAsync(settings, cache, "feed", log)
+                    ?? throw new InvalidOperationException("Failed to create file system");
                 var feedSettings = await FeedSettingsUtility.GetSettingsOrDefault(fileSystem, log, CancellationToken.None);
                 feedSettings.CatalogEnabled = true;
                 feedSettings.SymbolsEnabled = false;
@@ -32,7 +33,7 @@ namespace Test.Common
                     throw new InvalidOperationException("Catalog init failed");
                 }
 
-                if (Directory.GetFiles(nupkgFolder).Any())
+                if (Directory.GetFiles(nupkgFolder).Length > 0)
                 {
                     success = await PushCommand.PushPackages(settings, fileSystem, new List<string>() { nupkgFolder }, false, false, log, CancellationToken.None);
 
@@ -59,12 +60,13 @@ namespace Test.Common
         {
             var sleetConfig = Path.Combine(root, "sleet.json");
 
-            if (Directory.GetFiles(nupkgFolder).Any())
+            if (Directory.GetFiles(nupkgFolder).Length > 0)
             {
                 using (var cache = new LocalCache())
                 {
                     var settings = LocalSettings.Load(sleetConfig);
-                    var fileSystem = await FileSystemFactory.CreateFileSystemAsync(settings, cache, "feed");
+                    var fileSystem = await FileSystemFactory.CreateFileSystemAsync(settings, cache, "feed", log)
+                        ?? throw new InvalidOperationException("Failed to create file system");
 
                     var success = await PushCommand.PushPackages(settings, fileSystem, new List<string>() { nupkgFolder }, true, false, log, CancellationToken.None);
 
