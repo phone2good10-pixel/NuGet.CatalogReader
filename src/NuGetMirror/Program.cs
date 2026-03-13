@@ -74,7 +74,6 @@ namespace NuGetMirror
         private static void Configure()
         {
             // Настройки для .NET 8/9/10
-            AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
 
             var userAgent = new UserAgentStringBuilder("NuGetMirror");
             UserAgent.SetUserAgentString(userAgent);
